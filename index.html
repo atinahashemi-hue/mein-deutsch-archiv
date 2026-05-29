@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mein Deutsch Archiv</title>
+<style>
+body{margin:0;font-family:Tahoma,Arial;background:#eef7f2;color:#24312c}
+header{background:#8fb9a8;color:white;padding:24px;border-radius:0 0 28px 28px}
+h1{margin:0;font-size:28px} h2{margin-top:0}
+main{padding:16px;padding-bottom:90px}
+.card{background:white;border-radius:22px;padding:16px;margin-bottom:14px;box-shadow:0 6px 18px #0001}
+input,textarea,select,button{width:100%;padding:12px;margin:6px 0;border-radius:14px;border:1px solid #cdded5;font-family:inherit}
+button{background:#4f7f6b;color:white;font-weight:bold;border:0}
+.nav{position:fixed;bottom:10px;left:10px;right:10px;background:white;border-radius:24px;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:8px;box-shadow:0 5px 20px #0002}
+.nav button{font-size:12px;background:#eef7f2;color:#4f7f6b}
+.page{display:none}.page.active{display:block}
+.item{border:1px solid #dfe9e3;border-radius:16px;padding:12px;margin:8px 0;background:#fbfffd}
+.flash{min-height:180px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:28px;background:#fff;border:2px dashed #8fb9a8;border-radius:24px;padding:20px}
+.small{color:#6d7d75;font-size:13px}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🌿 Mein Deutsch Archiv</h1>
+<p>اپ شخصی آلمانی من</p>
+</header>
+
+<main>
+<section id="home" class="page active">
+<div class="card">
+<h2>خانه</h2>
+<p>📚 لغت‌ها: <b id="wc">0</b></p>
+<p>📝 گرامرها: <b id="gc">0</b></p>
+<p>⭐ علاقه‌مندی‌ها: <b id="fc">0</b></p>
+</div>
+</section>
+
+<section id="words" class="page">
+<div class="card">
+<h2>📚 Wörterbuch</h2>
+<input id="w_de" placeholder="کلمه آلمانی">
+<input id="w_fa" placeholder="معنی فارسی">
+<textarea id="w_ex" placeholder="مثال آلمانی"></textarea>
+<input id="w_level" placeholder="سطح / درس / صفحه">
+<button onclick="addWord()">ذخیره لغت</button>
+</div>
+<div class="card">
+<input id="search" oninput="render()" placeholder="جستجو...">
+<div id="wordList"></div>
+</div>
+</section>
+
+<section id="grammar" class="page">
+<div class="card">
+<h2>📝 Grammatik</h2>
+<input id="g_title" placeholder="عنوان گرامر">
+<textarea id="g_rule" placeholder="قانون / توضیح"></textarea>
+<textarea id="g_ex" placeholder="مثال‌ها"></textarea>
+<button onclick="addGrammar()">ذخیره گرامر</button>
+</div>
+<div class="card"><div id="grammarList"></div></div>
+</section>
+
+<section id="flash" class="page">
+<div class="card">
+<h2>🃏 Flashcards</h2>
+<div id="flashCard" class="flash" onclick="flip()">اول لغت ذخیره کن</div>
+<button onclick="prev()">قبلی</button>
+<button onclick="next()">بعدی</button>
+</div>
+</section>
+
+<section id="lesen" class="page">
+<div class="card">
+<h2>📖 Lesen Notizen</h2>
+<textarea id="lesenText" placeholder="کلمات سخت، Paraphrase، نکته‌های Lesen"></textarea>
+<button onclick="saveLesen()">ذخیره Lesen</button>
+</div>
+<div class="card"><div id="lesenList"></div></div>
+</section>
+
+<section id="profile" class="page">
+<div class="card">
+<h2>👤 Profil</h2>
+<p>اینجا آرشیو شخصی آلمانی تو ذخیره می‌شود.</p>
+<button onclick="backup()">گرفتن بکاپ</button>
+<button onclick="clearAll()">پاک کردن همه اطلاعات</button>
+</div>
+</section>
+</main>
+
+<div class="nav">
+<button onclick="show('home')">🏠<br>Home</button>
+<button onclick="show('words')">📚<br>Wörter</button>
+<button onclick="show('grammar')">📝<br>Grammatik</button>
+<button onclick="show('flash')">🃏<br>Karten</button>
+<button onclick="show('lesen')">📖<br>Lesen</button>
+</div>
+
+<script>
+let data=JSON.parse(localStorage.getItem("deutschArchiv")||'{"words":[],"grammar":[],"lesen":[]}')
+let index=0, back=false
+
+function save(){localStorage.setItem("deutschArchiv",JSON.stringify(data));render()}
+function show(id){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.getElementById(id).classList.add("active");render()}
+function addWord(){
+ if(!w_de.value||!w_fa.value)return alert("کلمه و معنی رو بنویس")
+ data.words.push({de:w_de.value,fa:w_fa.value,ex:w_ex.value,level:w_level.value,fav:false})
+ w_de.value=w_fa.value=w_ex.value=w_level.value=""
+ save()
+}
+function addGrammar(){
+ if(!g_title.value)return alert("عنوان گرامر رو بنویس")
+ data.grammar.push({title:g_title.value,rule:g_rule.value,ex:g_ex.value})
+ g_title.value=g_rule.value=g_ex.value=""
+ save()
+}
+function saveLesen(){
+ if(!lesenText.value)return
+ data.lesen.push(lesenText.value)
+ lesenText.value=""
+ save()
+}
+function fav(i){data.words[i].fav=!data.words[i].fav;save()}
+function delWord(i){data.words.splice(i,1);save()}
+function delGrammar(i){data.grammar.splice(i,1);save()}
+function render(){
+ wc.innerText=data.words.length
+ gc.innerText=data.grammar.length
+ fc.innerText=data.words.filter(w=>w.fav).length
+ let q=(search?.value||"").toLowerCase()
+ wordList.innerHTML=data.words.map((w,i)=>({w,i})).filter(x=>JSON.stringify(x.w).toLowerCase().includes(q)).map(x=>`
+ <div class="item">
+ <b>${x.w.fav?"⭐ ":""}${x.w.de}</b><br>${x.w.fa}
+ <p class="small">${x.w.level||""}</p>
+ <p>${x.w.ex||""}</p>
+ <button onclick="fav(${x.i})">⭐ Favorit</button>
+ <button onclick="delWord(${x.i})">حذف</button>
+ </div>`).join("")
+ grammarList.innerHTML=data.grammar.map((g,i)=>`
+ <div class="item"><b>${g.title}</b><p>${g.rule}</p><p>${g.ex}</p><button onclick="delGrammar(${i})">حذف</button></div>`).join("")
+ lesenList.innerHTML=data.lesen.map(t=>`<div class="item">${t}</div>`).join("")
+ renderFlash()
+}
+function renderFlash(){
+ if(!data.words.length){flashCard.innerHTML="اول لغت ذخیره کن";return}
+ let w=data.words[index]
+ flashCard.innerHTML=back?`<div><b>${w.fa}</b><br><small>${w.ex||""}</small></div>`:w.de
+}
+function flip(){back=!back;renderFlash()}
+function next(){if(data.words.length){index=(index+1)%data.words.length;back=false;renderFlash()}}
+function prev(){if(data.words.length){index=(index-1+data.words.length)%data.words.length;back=false;renderFlash()}}
+function backup(){alert(JSON.stringify(data))}
+function clearAll(){if(confirm("همه پاک شود؟")){localStorage.removeItem("deutschArchiv");location.reload()}}
+render()
+</script>
+</body>
+</html>
